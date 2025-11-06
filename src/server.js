@@ -7,7 +7,20 @@ app.use(express.json());
 
 // Replace the string with a proper route handler
 app.get('/', (req, res) => {
-  res.send('SERVER IS RUNNING');
+  res.json({ 
+    user: {
+      name: "John",
+      email: "test@example.com",
+  } });
+});
+
+// Replace the string with a proper route handler
+app.get('/water', (req, res) => {
+  res.json({ 
+    user: {
+      water: 1.5 ,
+    } 
+  });
 });
 
 const PORT = 5000;
