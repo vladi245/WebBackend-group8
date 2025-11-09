@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { getAllUsers } = require('../models/User');
 
 // Route: GET /
 router.get('/', (req, res) => {
@@ -27,6 +28,16 @@ router.get('/user', (req, res) => {
       name: "Washington",
     },
   });
+});
+
+router.get('/users', async (req, res) => {
+  try {
+    const users = await getAllUsers();
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 module.exports = router;
