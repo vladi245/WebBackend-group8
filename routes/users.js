@@ -1,32 +1,44 @@
 const express = require('express');
 const router = express.Router();
+const exampleUser = require('../models/User');
 
-// Route: GET /
-router.get('/', (req, res) => {
-  res.json({
-    user: {
-      name: "John",
-      email: "test@example.com",
-    },
-  });
+// Route to return only the user's name
+router.get('/name', (req, res) => {
+  res.json({ name: exampleUser.name });
 });
 
-// Route: GET /water
-router.get('/water', (req, res) => {
-  res.json({
-    user: {
-      water: 1.5,
-    },
-  });
+router.get('/calorie-intake', (req, res) => {
+  res.json({ name: exampleUser.calorieIntake });
 });
 
-// Route: GET /user
-router.get('/user', (req, res) => {
-  res.json({
-    user: {
-      name: "Washington",
-    },
-  });
+router.get('/calorie-goal', (req, res) => {
+  res.json({ name: exampleUser.caloreiGoal });
 });
+
+router.get('/water-card', (req, res) => {
+  res.json({ name: exampleUser.water });
+});
+
+router.get('/water-card-goal', (req, res) => {
+  res.json({ name: exampleUser.caloreiGoal });
+});
+
+router.get('/calories-burned', (req, res) => {
+  res.json({ name: exampleUser.calories });
+});
+
+router.get('/standing-stats', (req, res) => {
+  res.json({ name: exampleUser.standingStats });
+});
+
+router.get('/workout-card', (req, res) => {
+  res.json({ name: exampleUser.workoutCard });
+});
+
+router.get('/friends-activtiy', (req, res) => {
+  res.json({ name: exampleUser.friendsActivty });
+});
+
+
 
 module.exports = router;
