@@ -1,3 +1,5 @@
+const pool = require('../src/db');
+
 const user = {
   id: 1,
   name: "Washington",
@@ -42,4 +44,9 @@ const user = {
 
 };
 
-module.exports = user;
+const getAllUsers = async () => {
+  const res = await pool.query('SELECT * FROM users');
+  return res.rows;
+};
+
+module.exports = { getAllUsers, user };
