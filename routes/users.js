@@ -2,32 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { getAllUsers } = require('../models/User');
 
-// Route: GET /
-router.get('/', (req, res) => {
-  res.json({
-    user: {
-      name: "John",
-      email: "test@example.com",
-    },
-  });
-});
-
-// Route: GET /water
-router.get('/water', (req, res) => {
-  res.json({
-    user: {
-      water: 1.5,
-    },
-  });
-});
-
-// Route: GET /user
-router.get('/user', (req, res) => {
-  res.json({
-    user: {
-      name: "Washington",
-    },
-  });
+// Route to return only the user's name
+router.get('/name', (req, res) => {
+  res.json({ name: exampleUser.name });
 });
 
 router.get('/users', async (req, res) => {
