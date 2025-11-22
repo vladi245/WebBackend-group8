@@ -1,4 +1,3 @@
-import { get } from "../routes/workout.js";
 import pool from "../src/db.js";
 
 export const UserWorkoutModel = {
@@ -52,8 +51,9 @@ export const UserWorkoutModel = {
         const row = res.rows[0];
 
         return {
-            totalMeals: row.total_meals,
-            caloriesEaten: row.calories_eaten,
+            totalWorkouts: row.total_workouts,
+            caloriesBurned: row.calories_burned,
+            daysActive: row.total_workouts,
         };
     },
 
@@ -137,7 +137,7 @@ export const UserWorkoutModel = {
         const week = [];
 
         let total = 0;
-        let totalWorkouts = 0;
+
 
         for (let i = 0; i < 7; i++) {
             const d = new Date(monday);
@@ -152,9 +152,9 @@ export const UserWorkoutModel = {
             });
 
             total += calories;
-            if (calories > 0) totalWorkouts++;
+
         }
 
-        return { week, total, totalWorkouts };
+        return { week, total };
     },
 };

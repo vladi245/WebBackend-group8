@@ -8,7 +8,7 @@ function getUserId(req) {
     return null;
 }
 
-export const userMealsController = {
+export const userWorkoutController = {
 
 
     addWorkoutEntry: async (req, res) => {
