@@ -20,4 +20,21 @@ export const adminUsersController = {
       res.status(500).json({ error: "Database error while deleting user" });
     }
   }
+  ,
+  changeUserType: async (req, res) => {
+    try {
+      const { type } = req.body;
+      const allowed = ["standard", "premium"];
+      if (!type || !allowed.includes(type)) {
+        return res.status(400).json({ error: "Invalid type. Allowed: standard, premium" });
+      }
+
+      const updated = await UserModel.updateType(req.params.id, type);
+      if (!updated) return res.status(404).json({ error: 'User not found' });
+      res.json({ user: updated });
+    } catch (err) {
+      console.error('Error changing user type:', err);
+      res.status(500).json({ error: 'Database error while changing user type' });
+    }
+  }
 };
