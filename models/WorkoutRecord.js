@@ -36,32 +36,33 @@ export const WorkoutRecordModel = {
     },
 
     getAggregatedStatsByUser: async (user_id) => {
-        // total calories overall and total_workouts counted by distinct days with >=1 record
-        // Also compute total_records for minutes (15 minutes per record)
+        // total calories overall, total_workouts (distinct days) and total exercises
+        // Each exercise will be treated as a 15-minute chunk when computing minutes
         const totalRes = await pool.query(
             `SELECT COUNT(DISTINCT date_trunc('day', wr.timestamp)) AS total_workouts,
                     COALESCE(SUM(COALESCE(w.calories_burned,0)),0) AS total_calories,
-                    COUNT(*) AS total_records
+                    COUNT(*) AS total_exercises
        FROM workout_records wr
        JOIN workouts w ON wr.workout_id = w.id
        WHERE wr.user_id = $1`,
             [user_id]
         );
 
-        // calories and record counts in the last 7 days
+        // calories and exercise counts in the last 7 days
         const weekRes = await pool.query(
-            `SELECT COUNT(*) AS week_records, COALESCE(SUM(COALESCE(w.calories_burned,0)),0) AS week_calories
+            `SELECT COALESCE(SUM(COALESCE(w.calories_burned,0)),0) AS week_calories,
+                    COUNT(*) AS week_exercises
        FROM workout_records wr
        JOIN workouts w ON wr.workout_id = w.id
        WHERE wr.user_id = $1 AND wr.timestamp >= (now() - interval '6 days')::timestamp`,
             [user_id]
         );
 
-        // daily totals for last 7 days (including today) — return date, calories and record count
+        // daily totals for last 7 days (including today) — return date, exercises count and calories
         const daysRes = await pool.query(
             `SELECT date_trunc('day', wr.timestamp) AS day,
-                    COALESCE(SUM(COALESCE(w.calories_burned,0)),0) AS calories,
-                    COUNT(*) AS records
+                    COUNT(*) AS exercises,
+                    COALESCE(SUM(COALESCE(w.calories_burned,0)),0) AS calories
        FROM workout_records wr
        JOIN workouts w ON wr.workout_id = w.id
        WHERE wr.user_id = $1 AND wr.timestamp >= (now() - interval '6 days')::timestamp
@@ -86,26 +87,26 @@ export const WorkoutRecordModel = {
         daysRes.rows.forEach(r => {
             const key = (r.day && r.day.toISOString) ? r.day.toISOString().slice(0, 10) : new Date(r.day).toISOString().slice(0, 10);
             dailyMap[key] = {
-                calories: parseInt(r.calories, 10) || 0,
-                records: parseInt(r.records, 10) || 0
+                exercises: parseInt(r.exercises, 10) || 0,
+                calories: parseInt(r.calories, 10) || 0
             };
         });
 
-        const dailySeries = days.map(day => ({
-            date: day,
-            calories: (dailyMap[day] && dailyMap[day].calories) || 0,
-            minutes: ((dailyMap[day] && dailyMap[day].records) || 0) * 15
-        }));
+        const dailySeries = days.map(day => {
+            const entry = dailyMap[day] || { exercises: 0, calories: 0 };
+            const minutes = (entry.exercises || 0) * 15;
+            return { date: day, exercises: entry.exercises, calories: entry.calories, minutes };
+        });
 
-        const totalRecords = parseInt(totalRes.rows[0].total_records, 10) || 0;
-        const weekRecords = parseInt(weekRes.rows[0].week_records, 10) || 0;
+        const totalExercises = parseInt(totalRes.rows[0].total_exercises, 10) || 0;
+        const weekExercises = parseInt(weekRes.rows[0].week_exercises, 10) || 0;
 
         return {
             total_workouts: parseInt(totalRes.rows[0].total_workouts, 10) || 0,
             total_calories: parseInt(totalRes.rows[0].total_calories, 10) || 0,
-            total_minutes: totalRecords * 15,
+            total_minutes: totalExercises * 15,
             week_calories: parseInt(weekRes.rows[0].week_calories, 10) || 0,
-            week_minutes: weekRecords * 15,
+            week_minutes: weekExercises * 15,
             daily: dailySeries
         };
     }
