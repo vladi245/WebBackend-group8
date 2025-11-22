@@ -2,7 +2,7 @@ import express from "express";
 const router = express.Router();
 
 import { dashboardController } from "../controllers/dashboardController.js";
-import { authMiddleware } from "../middleware/authMiddleware.js";
+import authMiddleware from "../src/middleware/authMiddleware.js";
 
 router.use(authMiddleware);
 router.get("/user-stats", dashboardController.getUserStats);
