@@ -29,4 +29,12 @@ export const UserModel = {
     const res = await pool.query("SELECT id, name, email, type, current_desk_id, standing_height, sitting_height, created_at FROM users WHERE id = $1", [id]);
     return res.rows[0] || null;
   }
+  ,
+  updateType: async (id, type) => {
+    const res = await pool.query(
+      `UPDATE users SET type = $2 WHERE id = $1 RETURNING id, name, email, type, current_desk_id, standing_height, sitting_height, created_at`,
+      [id, type]
+    );
+    return res.rows[0] || null;
+  }
 };
