@@ -17,18 +17,15 @@ export const userMealsController = {
       if (!userId)
         return res.status(401).json({ error: "User not authenticated" });
 
-      const { foodId, mealType } = req.body;
+      const { foodId } = req.body;
 
       if (!foodId)
         return res.status(400).json({ error: "foodId is required" });
 
-      if (!mealType)
-        return res.status(400).json({ error: "mealType is required" });
 
       const entry = await MealsModel.createEntry({
         userId,
-        foodId,
-        mealType,
+        foodId
       });
 
       const stats = await MealsModel.getTodayStats(userId);
@@ -82,10 +79,6 @@ export const userMealsController = {
     }
   },
 
-  
-
-
-
   getTodayStats: async (req, res) => {
     try {
       const userId = getUserId(req);
@@ -102,9 +95,15 @@ export const userMealsController = {
     }
   },
 
-  
-
-
+  getFoods: async (req, res) => {
+    try {
+      const foods = await MealsModel.getAllFoods();
+      res.json(foods);
+    } catch (err) {
+      console.error("Error getting foods:", err);
+      res.status(500).json({ error: "Database error while getting foods" });
+    }
+  },
 
 
   getMeals: async (req, res) => {
@@ -122,10 +121,6 @@ export const userMealsController = {
         .json({ error: "Database error while getting meals" });
     }
   },
-
- 
-  
-
 
   getWeeklyStats: async (req, res) => {
     try {

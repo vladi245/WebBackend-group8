@@ -3,19 +3,33 @@ import pool from "../src/db.js";
 export const MealsModel = {
 
 
-  createEntry: async ({ userId, foodId, mealType }) => {
+  createEntry: async ({ userId, foodId }) => {
     const res = await pool.query(
       `
-      INSERT INTO food_records (user_id, food_id, meal_type)
-      VALUES ($1, $2, $3)
+      INSERT INTO food_records (user_id, food_id)
+      VALUES ($1, $2)
       RETURNING *
       `,
-      [userId, foodId, mealType]
+      [userId, foodId]
     );
 
     return res.rows[0];
   },
 
+  getAllFoods: async () => {
+    const res = await pool.query(
+      `
+      SELECT 
+        id,
+        name,
+        calories_intake AS calories
+      FROM foods
+      ORDER BY id ASC
+      `
+    );
+
+    return res.rows;
+  },
 
 
   removeEntryById: async ({ userId, recordId }) => {
@@ -61,7 +75,6 @@ export const MealsModel = {
       `
       SELECT
         fr.id,
-        fr.meal_type AS "mealType",
         fr.food_id AS "foodId",
         f.name,
         f.calories_intake AS "calories"
