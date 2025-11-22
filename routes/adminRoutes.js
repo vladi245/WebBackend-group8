@@ -8,6 +8,7 @@ import { adminFoodsController } from "../controllers/adminFoodsController.js";
 // USERS
 router.get("/users", adminUsersController.getAllUsers);
 router.delete("/users/:id", adminUsersController.deleteUser);
+router.patch("/users/:id/type", adminUsersController.changeUserType);
 
 // WORKOUTS
 router.get("/workouts", adminWorkoutsController.getAllWorkouts);
