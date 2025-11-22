@@ -93,7 +93,7 @@ export const adminDashboardController = {
         DashboardModel.getUserStats(),
         DashboardModel.getFoodStats(),
         DashboardModel.getWaterStats(),
-        DashboardModel.getWorkoutStats()
+        DashboardModel.getWorkoutStats(),
         DashboardModel.getStandingStats(),
         DashboardModel.getRecentActivity(5)
       ]);

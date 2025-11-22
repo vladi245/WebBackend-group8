@@ -2,10 +2,10 @@ import express from "express";
 const router = express.Router();
 
 import { adminDashboardController } from "../controllers/adminDashboardController.js";
-import { adminAuthMiddleware } from "../middleware/adminAuthMiddleware.js";
+import authMiddleware from "../src/middleware/authMiddleware.js";
 
 
-router.use(adminAuthMiddleware);
+router.use(authMiddleware);
 router.get("/stats", adminDashboardController.getStats);
 router.get("/user-stats", adminDashboardController.getUserStats);
 router.get("/calories-stats", adminDashboardController.getCaloriesStats);
