@@ -79,9 +79,7 @@ export const MealsModel = {
 
     //query calories grouped by day
     const res = await pool.query(
-      `
-      SELECT * FROM meal_($1, $2, $3)
-      `,
+      "SELECT * FROM meal_clear($1, $2, $3)",
       [userId, startIso, endIso]
     );
 
