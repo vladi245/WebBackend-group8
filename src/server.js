@@ -11,6 +11,7 @@ import authRoutes from '../routes/auth.js';
 import authMiddleware from './middleware/authMiddleware.js';
 import workoutsRoutes from '../routes/workouts.js';
 import exercisesRoutes from '../routes/exercises.js';
+import desksRouter from "../routes/desks.js";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 
 app.use("/api", usersRouter);
 app.use("/api", userMealsRoutes);
+app.use("/api", desksRouter);
 app.use("/admin", adminRoutes);
 
 
