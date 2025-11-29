@@ -16,10 +16,10 @@ router.get('/desks', async (req, res) => {
 // GET /desks/:id - get a single desk by id
 router.get('/desks/:id', async (req, res) => {
     try {
-        const id = parseInt(req.params.id, 10);
-        if (Number.isNaN(id)) return res.status(400).json({ error: 'Invalid id' });
+        const deskId = typeof req.params.id === 'string' ? req.params.id.trim() : '';
+        if (!deskId) return res.status(400).json({ error: 'Invalid id' });
 
-        const desk = await getDeskById(id);
+        const desk = await getDeskById(deskId);
         if (!desk) return res.status(404).json({ error: 'Desk not found' });
         res.json(desk);
     } catch (err) {
@@ -33,7 +33,7 @@ router.post('/desks', async (req, res) => {
     try {
         const { id, height } = req.body;
         const parsedHeight = Number(height);
-        const parsedId = Number(id);
+        const deskId = id !== undefined && id !== null ? String(id).trim() : '';
 
         if (!Number.isFinite(parsedHeight)) {
             return res.status(400).json({ error: 'height must be a numeric value' });
@@ -43,15 +43,11 @@ router.post('/desks', async (req, res) => {
             return res.status(400).json({ error: 'height must be a non-negative integer' });
         }
 
-        if (!Number.isFinite(parsedId)) {
-            return res.status(400).json({ error: 'id must be a numeric value' });
+        if (!deskId) {
+            return res.status(400).json({ error: 'id must be a non-empty string' });
         }
 
-        if (!Number.isInteger(parsedId) || parsedId <= 0) {
-            return res.status(400).json({ error: 'id must be a positive integer' });
-        }
-
-        const createdDesk = await createDesk({ id: parsedId, height: parsedHeight });
+        const createdDesk = await createDesk({ id: deskId, height: parsedHeight });
         res.status(201).json(createdDesk);
     } catch (err) {
         console.error('Failed to create desk', err);
@@ -67,13 +63,21 @@ router.post('/desks', async (req, res) => {
 // PUT /desks/:id/height - update desk height
 router.put('/desks/:id/height', async (req, res) => {
     try {
-        const id = parseInt(req.params.id, 10);
+        const deskId = typeof req.params.id === 'string' ? req.params.id.trim() : '';
         const { height } = req.body;
+        const parsedHeight = Number(height);
 
-        if (Number.isNaN(id)) return res.status(400).json({ error: 'Invalid id' });
-        if (typeof height !== 'number') return res.status(400).json({ error: 'height must be a number' });
+        if (!deskId) return res.status(400).json({ error: 'Invalid id' });
 
-        const updated = await updateDeskHeight(id, height);
+        if (!Number.isFinite(parsedHeight)) {
+            return res.status(400).json({ error: 'height must be a numeric value' });
+        }
+
+        if (!Number.isInteger(parsedHeight) || parsedHeight < 0) {
+            return res.status(400).json({ error: 'height must be a non-negative integer' });
+        }
+
+        const updated = await updateDeskHeight(deskId, parsedHeight);
         if (!updated) return res.status(404).json({ error: 'Desk not found' });
         res.json(updated);
     } catch (err) {
