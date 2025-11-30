@@ -2,7 +2,7 @@ import pool from "../src/db.js";
 
 export const UserModel = {
   getAll: async () => {
-    const res = await pool.query("SELECT * FROM user_get");
+    const res = await pool.query("SELECT * FROM user_get()");
     return res.rows;
   },
 

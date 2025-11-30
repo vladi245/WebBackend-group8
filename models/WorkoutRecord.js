@@ -41,14 +41,7 @@ export const WorkoutRecordModel = {
 
         // daily totals for last 7 days (including today) — return date, calories and record count
         const daysRes = await pool.query(
-            `SELECT date_trunc('day', wr.timestamp) AS day,
-                    COALESCE(SUM(COALESCE(w.calories_burned,0)),0) AS calories,
-                    COUNT(*) AS records
-       FROM workout_records wr
-       JOIN workouts w ON wr.workout_id = w.id
-       WHERE wr.user_id = $1 AND wr.timestamp >= (now() - interval '6 days')::timestamp
-       GROUP BY day
-       ORDER BY day ASC`,
+            "SELECT * FROM workoutrecord_day($1)",
             [user_id]
         );
 
