@@ -10,12 +10,13 @@ export const WorkoutRecordModel = {
 
         // Return joined record including workout metadata so frontend can render name/calories
         const res = await pool.query(
-            "SELECT * FROM workoutrecord_get($1,) WHERE id = $2 ",
+            "SELECT * FROM workoutrecord_get($1) WHERE id = $2 ",
             [user_id, insertedId]
         );
 
         const row = res.rows[0];
         if (!row) return null;
+        // Normalize DB fields to what frontend expects
         return {
             record_id: row.record_id || row.id,
             workout_id: row.workout_id,
@@ -24,7 +25,8 @@ export const WorkoutRecordModel = {
             sets: row.sets,
             reps: row.reps,
             muscle_group: row.muscle_group,
-            timestamp: row.record_ts || row.timestamp || row.time || row.date
+            timestamp: row.record_ts || row.timestamp || row.time || row.day || row.date
+
         };
     },
 
@@ -108,7 +110,7 @@ export const WorkoutRecordModel = {
 
     deleteById: async (id, user_id = null) => {
         await pool.query(
-            "SELECT * FROM workoutrecord_delete($1, $2)",
+            "SELECT *FROM workoutrecord_delete($1, $2)",
             [id, user_id]
         );
 
