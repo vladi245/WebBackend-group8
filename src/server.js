@@ -11,6 +11,7 @@ import authRoutes from '../routes/auth.js';
 import authMiddleware from './middleware/authMiddleware.js';
 import workoutsRoutes from '../routes/workouts.js';
 import exercisesRoutes from '../routes/exercises.js';
+import desksRouter from "../routes/desks.js";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 
 app.use("/api", usersRouter);
 app.use("/api", userMealsRoutes);
+app.use("/api", desksRouter);
 app.use("/admin", adminRoutes);
 
 
@@ -32,6 +34,12 @@ app.use('/api/exercises', exercisesRoutes);
 
 // Protect admin routes with JWT middleware
 app.use('/admin', authMiddleware, adminRoutes);
+
+
+//test endpoint for PICO
+app.get("/test", (req, res) => {
+  res.status(200).json({ message: "Connection established" });
+});
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
