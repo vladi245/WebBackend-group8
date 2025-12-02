@@ -3,23 +3,29 @@ import pool from "../src/db.js";
 export const WorkoutRecordModel = {
     addRecord: async ({ workout_id, user_id, timestamp = null }) => {
         const insert = await pool.query(
-            `INSERT INTO workout_records (workout_id, user_id, timestamp)
-       VALUES ($1, $2, COALESCE($3, now()))
-       RETURNING id`,
+            "SELECT * FROM workoutrecord_model($1, $2, $3)",
             [workout_id, user_id, timestamp]
         );
         const insertedId = insert.rows[0].id;
 
         // Return joined record including workout metadata so frontend can render name/calories
         const res = await pool.query(
-            `SELECT wr.id as record_id, w.id as workout_id, w.name, w.calories_burned, w.sets, w.reps, w.muscle_group, wr.timestamp
-       FROM workout_records wr
-       JOIN workouts w ON wr.workout_id = w.id
-       WHERE wr.id = $1`
-            [insertedId]
+            "SELECT * FROM workoutrecord_get($1,) WHERE id = $2 ",
+            [user_id, insertedId]
         );
 
-        return res.rows[0];
+        const row = res.rows[0];
+        if (!row) return null;
+        return {
+            record_id: row.record_id || row.id,
+            workout_id: row.workout_id,
+            name: row.name,
+            calories_burned: row.calories_burned || row.calories,
+            sets: row.sets,
+            reps: row.reps,
+            muscle_group: row.muscle_group,
+            timestamp: row.record_ts || row.timestamp || row.time || row.date
+        };
     },
 
     getRecordsByUser: async (user_id, limit = 100) => {
@@ -27,7 +33,16 @@ export const WorkoutRecordModel = {
             "SELECT * FROM workoutrecord_user($1, $2)",
             [user_id, limit]
         );
-        return res.rows;
+        return res.rows.map((row) => ({
+            record_id: row.record_id || row.id,
+            workout_id: row.workout_id,
+            name: row.name,
+            calories_burned: row.calories_burned || row.calories,
+            sets: row.sets,
+            reps: row.reps,
+            muscle_group: row.muscle_group,
+            timestamp: row.record_ts || row.timestamp || row.time || row.day || row.date
+        }));
     },
 
     getAggregatedStatsByUser: async (user_id) => {
