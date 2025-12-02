@@ -3,14 +3,19 @@ import pool from "../src/db.js";
 export const WorkoutRecordModel = {
     addRecord: async ({ workout_id, user_id, timestamp = null }) => {
         const insert = await pool.query(
-            "SELECT * FROM workoutrecord_model($1, $2, $3)",
+            `INSERT INTO workout_records (workout_id, user_id, timestamp)
+       VALUES ($1, $2, COALESCE($3, now()))
+       RETURNING id`,
             [workout_id, user_id, timestamp]
         );
         const insertedId = insert.rows[0].id;
 
         // Return joined record including workout metadata so frontend can render name/calories
         const res = await pool.query(
-            "SELECT * FROM workoutrecord_get($1)",
+            `SELECT wr.id as record_id, w.id as workout_id, w.name, w.calories_burned, w.sets, w.reps, w.muscle_group, wr.timestamp
+       FROM workout_records wr
+       JOIN workouts w ON wr.workout_id = w.id
+       WHERE wr.id = $1`
             [insertedId]
         );
 
