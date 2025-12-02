@@ -7,6 +7,7 @@ import 'dotenv/config';
 
 import adminRoutes from "../routes/adminRoutes.js";
 import userMealsRoutes from "../routes/userMealsRoutes.js";
+import hydrationRoutes from "../routes/hydration.js";
 import authRoutes from '../routes/auth.js';
 import authMiddleware from './middleware/authMiddleware.js';
 import workoutsRoutes from '../routes/workouts.js';
@@ -20,6 +21,7 @@ app.use(express.json());
 
 app.use("/api", usersRouter);
 app.use("/api", userMealsRoutes);
+app.use("/api", hydrationRoutes);
 app.use("/api", desksRouter);
 app.use("/admin", adminRoutes);
 
