@@ -21,7 +21,7 @@ export const MealsModel = {
   removeEntryById: async ({ userId, recordId }) => {
     const res = await pool.query(
       "SELECT * FROM meal_delete($1, $2)",
-      [recordId, userId]
+      [userId, recordId]
     );
 
     return res.rows[0];
