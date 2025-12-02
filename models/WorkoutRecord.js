@@ -10,24 +10,11 @@ export const WorkoutRecordModel = {
 
         // Return joined record including workout metadata so frontend can render name/calories
         const res = await pool.query(
-            "SELECT * FROM workoutrecord_get($1) WHERE id = $2 ",
+            "SELECT * FROM workoutrecord_get($1, $2)",
             [user_id, insertedId]
         );
 
-        const row = res.rows[0];
-        if (!row) return null;
-        // Normalize DB fields to what frontend expects
-        return {
-            record_id: row.record_id || row.id,
-            workout_id: row.workout_id,
-            name: row.name,
-            calories_burned: row.calories_burned || row.calories,
-            sets: row.sets,
-            reps: row.reps,
-            muscle_group: row.muscle_group,
-            timestamp: row.record_ts || row.timestamp || row.time || row.day || row.date
-
-        };
+        return res.rows[0];
     },
 
     getRecordsByUser: async (user_id, limit = 100) => {
@@ -35,16 +22,7 @@ export const WorkoutRecordModel = {
             "SELECT * FROM workoutrecord_user($1, $2)",
             [user_id, limit]
         );
-        return res.rows.map((row) => ({
-            record_id: row.record_id || row.id,
-            workout_id: row.workout_id,
-            name: row.name,
-            calories_burned: row.calories_burned || row.calories,
-            sets: row.sets,
-            reps: row.reps,
-            muscle_group: row.muscle_group,
-            timestamp: row.record_ts || row.timestamp || row.time || row.day || row.date
-        }));
+        return res.rows;
     },
 
     getAggregatedStatsByUser: async (user_id) => {
