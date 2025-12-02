@@ -2,7 +2,7 @@ import pool from "../src/db.js";
 
 export const HydrationModel = {
 
-  // Get today's hydration data for a user
+  //get todas hydration data for a user
   getToday: async (userId) => {
     const res = await pool.query(
       `
@@ -23,9 +23,9 @@ export const HydrationModel = {
     return res.rows[0] || null;
   },
 
-  // Create or update today's hydration record
+  //create or update todays hydration record
   upsertToday: async ({ userId, goalMl, currentMl }) => {
-    // Try to update existing record for today
+    //try to update existing record for today
     const updateRes = await pool.query(
       `
       UPDATE hydration_records
@@ -43,7 +43,7 @@ export const HydrationModel = {
       return updateRes.rows[0];
     }
 
-    // No record for today, create one
+    //no record for today create one
     const insertRes = await pool.query(
       `
       INSERT INTO hydration_records (user_id, goal_ml, current_ml)
@@ -56,13 +56,13 @@ export const HydrationModel = {
     return insertRes.rows[0];
   },
 
-  // Add water to today's intake
+  //add water to todays intake
   addWater: async ({ userId, amountMl }) => {
-    // First ensure we have a record for today
+    //first ensure we have a record for today
     const today = await HydrationModel.getToday(userId);
     
     if (!today) {
-      // Create a new record with the added amount
+      //create a new record with the added amount
       return await HydrationModel.upsertToday({
         userId,
         goalMl: 2000,
@@ -70,7 +70,7 @@ export const HydrationModel = {
       });
     }
 
-    // Update existing record
+    //update existing record
     const res = await pool.query(
       `
       UPDATE hydration_records
@@ -86,7 +86,7 @@ export const HydrationModel = {
     return res.rows[0];
   },
 
-  // Remove water from today's intake
+  //remove water from todays intake
   removeWater: async ({ userId, amountMl }) => {
     const res = await pool.query(
       `
@@ -103,7 +103,7 @@ export const HydrationModel = {
     return res.rows[0] || null;
   },
 
-  // Reset today's intake to zero
+  //reset todays intake to zero
   resetToday: async (userId) => {
     const res = await pool.query(
       `
@@ -120,12 +120,12 @@ export const HydrationModel = {
     return res.rows[0] || null;
   },
 
-  // Update the daily goal
+  //update the daily goal
   updateGoal: async ({ userId, goalMl }) => {
     return await HydrationModel.upsertToday({ userId, goalMl, currentMl: null });
   },
 
-  // Get weekly hydration stats
+  //get weekly hydration stats
   getWeeklyStats: async (userId) => {
     const res = await pool.query(
       `

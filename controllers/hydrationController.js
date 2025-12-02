@@ -1,6 +1,6 @@
 import { HydrationModel } from "../models/Hydration.js";
 
-// Helper to get user ID from request
+//helper to get user ID from request
 function getUserId(req) {
   if (req?.user?.id) return req.user.id;
   if (req?.body?.userId) return req.body.userId;
@@ -10,8 +10,8 @@ function getUserId(req) {
 
 export const hydrationController = {
 
-  // GET /api/hydration
-  // Get today's hydration data
+  
+  //get hydration data
   getToday: async (req, res) => {
     try {
       const userId = getUserId(req);
@@ -21,7 +21,7 @@ export const hydrationController = {
 
       let data = await HydrationModel.getToday(userId);
 
-      // If no record exists for today, create one with defaults
+      //if no record exists for today create one with defaults
       if (!data) {
         data = await HydrationModel.upsertToday({
           userId,
@@ -41,8 +41,8 @@ export const hydrationController = {
     }
   },
 
-  // POST /api/hydration/add
-  // Add water to today's intake
+
+  //add water to todays intake
   addWater: async (req, res) => {
     try {
       const userId = getUserId(req);
@@ -72,8 +72,8 @@ export const hydrationController = {
     }
   },
 
-  // POST /api/hydration/remove
-  // Remove water from today's intake
+  
+  //remove water 
   removeWater: async (req, res) => {
     try {
       const userId = getUserId(req);
@@ -107,8 +107,7 @@ export const hydrationController = {
     }
   },
 
-  // POST /api/hydration/reset
-  // Reset today's intake to zero
+ 
   resetToday: async (req, res) => {
     try {
       const userId = getUserId(req);
@@ -119,7 +118,7 @@ export const hydrationController = {
       const data = await HydrationModel.resetToday(userId);
 
       if (!data) {
-        // No record to reset, create one with zero
+        //no record to reset create one with 0
         const newData = await HydrationModel.upsertToday({
           userId,
           goalMl: 2000,
@@ -144,8 +143,8 @@ export const hydrationController = {
     }
   },
 
-  // PUT /api/hydration/goal
-  // Update the daily water goal
+
+  //update the daily water goal
   updateGoal: async (req, res) => {
     try {
       const userId = getUserId(req);
@@ -175,8 +174,7 @@ export const hydrationController = {
     }
   },
 
-  // GET /api/hydration/weekly
-  // Get weekly hydration stats
+  //get weekly hydration stats
   getWeeklyStats: async (req, res) => {
     try {
       const userId = getUserId(req);
