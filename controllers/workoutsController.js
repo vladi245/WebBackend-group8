@@ -1,4 +1,5 @@
 import { WorkoutRecordModel } from "../models/WorkoutRecord.js";
+import { WorkoutModel } from "../models/Workout.js";
 
 export const workoutsController = {
     // POST /api/workouts  -> body: { workout_id }
@@ -65,6 +66,33 @@ export const workoutsController = {
         } catch (err) {
             console.error('Error deleting workout record:', err);
             res.status(500).json({ error: 'Database error while deleting record' });
+        }
+    },
+
+    getAllWorkouts: async (req, res) => {
+        try {
+            const workouts = await WorkoutModel.getAll();
+
+            console.log("Fetched workouts:", workouts);
+
+            // Normalize muscle_group field
+            const normalized = workouts.map(w => ({
+                id: w.id,
+                name: w.name,
+                calories_burned: w.calories_burned,
+                sets: w.sets,
+                reps: w.reps,
+                muscle_group: Array.isArray(w.muscle_group)
+                    ? w.muscle_group
+                    : (w.muscle_group ? JSON.parse(w.muscle_group) : [])
+            }));
+
+            console.log("Normalized workouts:", normalized);
+
+            res.json(normalized);
+        } catch (err) {
+            console.error("Error fetching workouts:", err);
+            res.status(500).json({ error: "Database error while fetching workouts" });
         }
     }
 };
