@@ -5,11 +5,7 @@ export const MealsModel = {
 
   createEntry: async ({ userId, foodId }) => {
     const res = await pool.query(
-      `
-      INSERT INTO food_records (user_id, food_id)
-      VALUES ($1, $2)
-      RETURNING *
-      `,
+      "SELECT * FROM meal_records($1, $2)",
       [userId, foodId]
     );
 
@@ -17,46 +13,25 @@ export const MealsModel = {
   },
 
   getAllFoods: async () => {
-    const res = await pool.query(
-      `
-      SELECT 
-        id,
-        name,
-        calories_intake AS calories
-      FROM foods
-      ORDER BY id ASC
-      `
-    );
-
+    const res = await pool.query("SELECT * FROM meal_list()");
     return res.rows;
   },
 
 
   removeEntryById: async ({ userId, recordId }) => {
     const res = await pool.query(
-      `
-      DELETE FROM food_records
-      WHERE id = $1 AND user_id = $2
-      RETURNING *
-      `,
-      [recordId, userId]
+      "SELECT * FROM meal_delete($1, $2)",
+      [userId, recordId]
     );
 
     return res.rows[0];
   },
 
-  
+
 
   getTodayStats: async (userId) => {
     const res = await pool.query(
-      `
-      SELECT
-        COUNT(*)::int AS total_meals,
-        COALESCE(SUM(f.calories_intake), 0)::int AS calories_eaten
-      FROM food_records fr
-      JOIN foods f ON f.id = fr.food_id
-      WHERE fr.user_id = $1
-      `,
+      "SELECT * FROM meal_today($1)",
       [userId]
     );
 
@@ -69,20 +44,10 @@ export const MealsModel = {
     };
   },
 
- 
+
   getMeals: async (userId) => {
     const res = await pool.query(
-      `
-      SELECT
-        fr.id,
-        fr.food_id AS "foodId",
-        f.name,
-        f.calories_intake AS "calories"
-      FROM food_records fr
-      JOIN foods f ON f.id = fr.food_id
-      WHERE fr.user_id = $1
-      ORDER BY fr.timestamp ASC
-      `,
+      "SELECT * FROM meal_get($1)",
       [userId]
     );
 
@@ -114,18 +79,7 @@ export const MealsModel = {
 
     //query calories grouped by day
     const res = await pool.query(
-      `
-      SELECT
-        DATE(fr.timestamp) AS day,
-        COALESCE(SUM(f.calories_intake), 0)::int AS calories
-      FROM food_records fr
-      JOIN foods f ON f.id = fr.food_id
-      WHERE fr.user_id = $1
-        AND fr.timestamp >= $2
-        AND fr.timestamp <= $3
-      GROUP BY DATE(fr.timestamp)
-      ORDER BY DATE(fr.timestamp)
-      `,
+      "SELECT * FROM meal_clear($1, $2, $3)",
       [userId, startIso, endIso]
     );
 
@@ -140,7 +94,7 @@ export const MealsModel = {
       map[key] = parseInt(r.calories, 10) || 0;
     });
 
-  
+
     const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     const week = [];
 

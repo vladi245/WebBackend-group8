@@ -3,20 +3,15 @@ import pool from "../src/db.js";
 export const WorkoutRecordModel = {
     addRecord: async ({ workout_id, user_id, timestamp = null }) => {
         const insert = await pool.query(
-            `INSERT INTO workout_records (workout_id, user_id, timestamp)
-       VALUES ($1, $2, COALESCE($3, now()))
-       RETURNING id`,
+            "SELECT * FROM workoutrecord_model($1, $2, $3)",
             [workout_id, user_id, timestamp]
         );
         const insertedId = insert.rows[0].id;
 
         // Return joined record including workout metadata so frontend can render name/calories
         const res = await pool.query(
-            `SELECT wr.id as record_id, w.id as workout_id, w.name, w.calories_burned, w.sets, w.reps, w.muscle_group, wr.timestamp
-       FROM workout_records wr
-       JOIN workouts w ON wr.workout_id = w.id
-       WHERE wr.id = $1`,
-            [insertedId]
+            "SELECT * FROM workoutrecord_get($1, $2)",
+            [user_id, insertedId]
         );
 
         return res.rows[0];
@@ -24,12 +19,7 @@ export const WorkoutRecordModel = {
 
     getRecordsByUser: async (user_id, limit = 100) => {
         const res = await pool.query(
-            `SELECT wr.id as record_id, w.id as workout_id, w.name, w.calories_burned, w.sets, w.reps, w.muscle_group, wr.timestamp
-       FROM workout_records wr
-       JOIN workouts w ON wr.workout_id = w.id
-       WHERE wr.user_id = $1
-       ORDER BY wr.timestamp DESC
-       LIMIT $2`,
+            "SELECT * FROM workoutrecord_user($1, $2)",
             [user_id, limit]
         );
         return res.rows;
@@ -39,34 +29,19 @@ export const WorkoutRecordModel = {
         // total calories overall and total_workouts counted by distinct days with >=1 record
         // Also compute total_records for minutes (15 minutes per record)
         const totalRes = await pool.query(
-            `SELECT COUNT(DISTINCT date_trunc('day', wr.timestamp)) AS total_workouts,
-                    COALESCE(SUM(COALESCE(w.calories_burned,0)),0) AS total_calories,
-                    COUNT(*) AS total_records
-       FROM workout_records wr
-       JOIN workouts w ON wr.workout_id = w.id
-       WHERE wr.user_id = $1`,
+            "SELECT * FROM workoutrecord_stats($1)",
             [user_id]
         );
 
         // calories and record counts in the last 7 days
         const weekRes = await pool.query(
-            `SELECT COUNT(*) AS week_records, COALESCE(SUM(COALESCE(w.calories_burned,0)),0) AS week_calories
-       FROM workout_records wr
-       JOIN workouts w ON wr.workout_id = w.id
-       WHERE wr.user_id = $1 AND wr.timestamp >= (now() - interval '6 days')::timestamp`,
+            "SELECT * FROM workoutrecord_week($1)",
             [user_id]
         );
 
         // daily totals for last 7 days (including today) — return date, calories and record count
         const daysRes = await pool.query(
-            `SELECT date_trunc('day', wr.timestamp) AS day,
-                    COALESCE(SUM(COALESCE(w.calories_burned,0)),0) AS calories,
-                    COUNT(*) AS records
-       FROM workout_records wr
-       JOIN workouts w ON wr.workout_id = w.id
-       WHERE wr.user_id = $1 AND wr.timestamp >= (now() - interval '6 days')::timestamp
-       GROUP BY day
-       ORDER BY day ASC`,
+            "SELECT * FROM workoutrecord_day($1)",
             [user_id]
         );
 
@@ -112,11 +87,10 @@ export const WorkoutRecordModel = {
     ,
 
     deleteById: async (id, user_id = null) => {
-        if (user_id) {
-            // ensure the record belongs to the user
-            await pool.query('DELETE FROM workout_records WHERE id = $1 AND user_id = $2', [id, user_id]);
-        } else {
-            await pool.query('DELETE FROM workout_records WHERE id = $1', [id]);
-        }
+        await pool.query(
+            "SELECT *FROM workoutrecord_delete($1, $2)",
+            [id, user_id]
+        );
+
     }
 };
