@@ -17,5 +17,29 @@ router.get('/users', async (req, res) => {
   }
 });
 
+//update username
+router.put('/users/:id/name', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Name is required' });
+    }
+
+    const { UserModel } = require('../models/User');
+    const user = await UserModel.updateName(id, name.trim());
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ message: 'Name updated', user });
+  } catch (err) {
+    console.error('Error updating name:', err);
+    res.status(500).json({ error: 'Database error while updating name' });
+  }
+});
+
 
 module.exports = router;

@@ -36,5 +36,13 @@ export const UserModel = {
       [id, type]
     );
     return res.rows[0] || null;
+  },
+
+  updateName: async (id, name) => {
+    const res = await pool.query(
+      `UPDATE users SET name = $2 WHERE id = $1 RETURNING id, name, email, type, current_desk_id, standing_height, sitting_height, created_at`,
+      [id, name]
+    );
+    return res.rows[0] || null;
   }
 };
