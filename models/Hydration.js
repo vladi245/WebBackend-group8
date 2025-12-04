@@ -5,18 +5,7 @@ export const HydrationModel = {
   //get todas hydration data for a user
   getToday: async (userId) => {
     const res = await pool.query(
-      `
-      SELECT 
-        id,
-        goal_ml,
-        current_ml,
-        DATE(recorded_at) as date
-      FROM hydration_records
-      WHERE user_id = $1
-        AND DATE(recorded_at) = CURRENT_DATE
-      ORDER BY recorded_at DESC
-      LIMIT 1
-      `,
+      "SELECT * FROM hydration_records($1)",
       [userId]
     );
 
@@ -27,15 +16,7 @@ export const HydrationModel = {
   upsertToday: async ({ userId, goalMl, currentMl }) => {
     //try to update existing record for today
     const updateRes = await pool.query(
-      `
-      UPDATE hydration_records
-      SET goal_ml = COALESCE($2, goal_ml),
-          current_ml = COALESCE($3, current_ml),
-          updated_at = NOW()
-      WHERE user_id = $1
-        AND DATE(recorded_at) = CURRENT_DATE
-      RETURNING *
-      `,
+      "SELECT * FROM hydration_update($1, $2, $3)",
       [userId, goalMl, currentMl]
     );
 
@@ -60,7 +41,7 @@ export const HydrationModel = {
   addWater: async ({ userId, amountMl }) => {
     //first ensure we have a record for today
     const today = await HydrationModel.getToday(userId);
-    
+
     if (!today) {
       //create a new record with the added amount
       return await HydrationModel.upsertToday({
