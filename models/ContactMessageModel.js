@@ -1,9 +1,9 @@
-const pool = require("../src/db.js");
+import pool from "../src/db.js";
 
-class ContactMessageModel {
+export class ContactMessageModel {
     static async create({ name, email, message }) {
         const res = await pool.query(
-            "SELECT * FROM contactmessage_create$1, $2, $3)",
+            "SELECT * FROM contactmessage_create($1, $2, $3)",
             [name, email, message]
         );
         return res.rows[0] || null;
@@ -16,5 +16,3 @@ class ContactMessageModel {
         return res.rows;
     }
 }
-
-module.exports = { ContactMessageModel };

@@ -1,7 +1,63 @@
-const express = require('express');
+import express from 'express';
+import { getAllDesks, getDeskById, createDesk, updateDeskHeight } from '../models/Desk.js';
+import { createDeskRecord, getWeeklyStandingStats, getLatestDeskRecord } from '../models/DeskRecord.js';
+
 const router = express.Router();
-const { getAllDesks, getDeskById, createDesk, updateDeskHeight } = require('../models/Desk');
-const { createDeskRecord, getWeeklyStandingStats, getLatestDeskRecord } = require('../models/DeskRecord');
+
+// Simulator configuration
+const SIMULATOR_API_KEY = 'E9Y2LxT4g1hQZ7aD8nR3mWx5P0qK6pV7';
+const SIMULATOR_BASE_URL = process.env.SIMULATOR_URL || 'http://localhost:8000';
+
+// GET /desks/connection/status - check if the simulator/pico system is connected
+router.get('/desks/connection/status', async (req, res) => {
+    try {
+        const { deskId } = req.query;
+
+        if (!deskId) {
+            return res.status(400).json({ error: 'deskId query parameter is required' });
+        }
+
+        // Try to ping the simulator to check if the system is running
+        const simulatorUrl = `${SIMULATOR_BASE_URL}/api/v2/${SIMULATOR_API_KEY}/desks/${deskId}/state/`;
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
+        try {
+            const response = await fetch(simulatorUrl, {
+                signal: controller.signal,
+                headers: { 'Connection': 'close' }
+            });
+            clearTimeout(timeout);
+
+            if (response.ok) {
+                const data = await response.json();
+                res.json({
+                    connected: true,
+                    deskId: deskId,
+                    currentHeight: data.position_mm,
+                    message: 'Simulator is reachable'
+                });
+            } else {
+                res.json({
+                    connected: false,
+                    deskId: deskId,
+                    message: 'Simulator returned error'
+                });
+            }
+        } catch (fetchErr) {
+            clearTimeout(timeout);
+            res.json({
+                connected: false,
+                deskId: deskId,
+                message: 'Simulator not reachable'
+            });
+        }
+    } catch (err) {
+        console.error('Failed to check connection status', err);
+        res.status(500).json({ error: 'Server error checking connection' });
+    }
+});
 
 // GET /desks - list all desks (mounted under /api)
 router.get('/desks', async (req, res) => {
@@ -157,4 +213,4 @@ router.get('/desks/records/latest', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;
