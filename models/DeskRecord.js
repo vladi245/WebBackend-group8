@@ -1,4 +1,4 @@
-const pool = require('../src/db.js');
+import pool from '../src/db.js';
 
 /**
  * Create a new desk record (status change event)
@@ -7,7 +7,7 @@ const pool = require('../src/db.js');
  * @param {string} status - 'standing' or 'sitting'
  * @returns {Promise<Object>} The created record
  */
-async function createDeskRecord(deskId, userId, status) {
+export async function createDeskRecord(deskId, userId, status) {
     const res = await pool.query(
         `INSERT INTO desk_records (desk_id, user_id, status, timestamp) 
          VALUES ($1, $2, $3, NOW()) 
@@ -24,7 +24,7 @@ async function createDeskRecord(deskId, userId, status) {
  * @param {Date} endDate - End of date range
  * @returns {Promise<Array>} Array of desk records
  */
-async function getDeskRecordsByUser(userId, startDate, endDate) {
+export async function getDeskRecordsByUser(userId, startDate, endDate) {
     const res = await pool.query(
         `SELECT * FROM desk_records 
          WHERE user_id = $1 
@@ -41,7 +41,7 @@ async function getDeskRecordsByUser(userId, startDate, endDate) {
  * @param {number} userId - The user ID
  * @returns {Promise<Object|null>} The latest record or null
  */
-async function getLatestDeskRecord(userId) {
+export async function getLatestDeskRecord(userId) {
     const res = await pool.query(
         `SELECT * FROM desk_records 
          WHERE user_id = $1 
@@ -58,7 +58,7 @@ async function getLatestDeskRecord(userId) {
  * @param {number} userId - The user ID
  * @returns {Promise<Array>} Array of daily standing stats
  */
-async function getWeeklyStandingStats(userId) {
+export async function getWeeklyStandingStats(userId) {
     // Get records from the last 7 days
     const endDate = new Date();
     const startDate = new Date();
@@ -150,9 +150,4 @@ async function getWeeklyStandingStats(userId) {
     return Object.values(weekData).sort((a, b) => a.date.localeCompare(b.date));
 }
 
-module.exports = {
-    createDeskRecord,
-    getDeskRecordsByUser,
-    getLatestDeskRecord,
-    getWeeklyStandingStats,
-};
+

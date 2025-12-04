@@ -1,7 +1,6 @@
-const express = require('express');
+import express from 'express';
+import { UserModel } from '../models/User.js';
 const router = express.Router();
-const { getAllUsers } = require('../models/User');
-
 
 router.get('/name', (req, res) => {
   res.json({ name: exampleUser.name });
@@ -9,7 +8,7 @@ router.get('/name', (req, res) => {
 
 router.get('/users', async (req, res) => {
   try {
-    const users = await getAllUsers();
+    const users = await UserModel.getAll();
     res.json(users);
   } catch (err) {
     console.error(err);
@@ -17,5 +16,4 @@ router.get('/users', async (req, res) => {
   }
 });
 
-
-module.exports = router;
+export default router;

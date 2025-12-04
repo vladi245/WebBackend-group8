@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import { getAllDesks, getDeskById, createDesk, updateDeskHeight } from '../models/Desk.js';
+import { createDeskRecord, getWeeklyStandingStats, getLatestDeskRecord } from '../models/DeskRecord.js';
+
 const router = express.Router();
-const { getAllDesks, getDeskById, createDesk, updateDeskHeight } = require('../models/Desk');
-const { createDeskRecord, getWeeklyStandingStats, getLatestDeskRecord } = require('../models/DeskRecord');
 
 // GET /desks - list all desks (mounted under /api)
 router.get('/desks', async (req, res) => {
@@ -157,4 +158,4 @@ router.get('/desks/records/latest', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;
