@@ -2,7 +2,7 @@ import pool from "../src/db.js";
 
 export const HydrationModel = {
 
-  //get todas hydration data for a user
+  //get todays hydration data for a user
   getToday: async (userId) => {
     const res = await pool.query(
       "SELECT * FROM hydration_records($1)",
@@ -26,11 +26,7 @@ export const HydrationModel = {
 
     //no record for today create one
     const insertRes = await pool.query(
-      `
-      INSERT INTO hydration_records (user_id, goal_ml, current_ml)
-      VALUES ($1, $2, $3)
-      RETURNING *
-      `,
+      "SELECT * FROM hydration_create($1, $2, $3)",
       [userId, goalMl || 2000, currentMl || 0]
     );
 
@@ -53,14 +49,7 @@ export const HydrationModel = {
 
     //update existing record
     const res = await pool.query(
-      `
-      UPDATE hydration_records
-      SET current_ml = current_ml + $2,
-          updated_at = NOW()
-      WHERE user_id = $1
-        AND DATE(recorded_at) = CURRENT_DATE
-      RETURNING *
-      `,
+      "SELECT * FROM hydration_add($1, $2)",
       [userId, amountMl]
     );
 
@@ -70,14 +59,7 @@ export const HydrationModel = {
   //remove water from todays intake
   removeWater: async ({ userId, amountMl }) => {
     const res = await pool.query(
-      `
-      UPDATE hydration_records
-      SET current_ml = GREATEST(0, current_ml - $2),
-          updated_at = NOW()
-      WHERE user_id = $1
-        AND DATE(recorded_at) = CURRENT_DATE
-      RETURNING *
-      `,
+      "SELECT * FROM hydration_remove($1, $2)",
       [userId, amountMl]
     );
 
@@ -87,14 +69,7 @@ export const HydrationModel = {
   //reset todays intake to zero
   resetToday: async (userId) => {
     const res = await pool.query(
-      `
-      UPDATE hydration_records
-      SET current_ml = 0,
-          updated_at = NOW()
-      WHERE user_id = $1
-        AND DATE(recorded_at) = CURRENT_DATE
-      RETURNING *
-      `,
+      "SELECT * FROM hydration_reset($1)",
       [userId]
     );
 
@@ -105,24 +80,5 @@ export const HydrationModel = {
   updateGoal: async ({ userId, goalMl }) => {
     return await HydrationModel.upsertToday({ userId, goalMl, currentMl: null });
   },
-
-  //get weekly hydration stats
-  getWeeklyStats: async (userId) => {
-    const res = await pool.query(
-      `
-      SELECT 
-        DATE(recorded_at) as date,
-        goal_ml,
-        current_ml
-      FROM hydration_records
-      WHERE user_id = $1
-        AND recorded_at >= CURRENT_DATE - INTERVAL '7 days'
-      ORDER BY recorded_at ASC
-      `,
-      [userId]
-    );
-
-    return res.rows;
-  }
 
 };

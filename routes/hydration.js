@@ -18,7 +18,4 @@ router.post("/hydration/reset", hydrationController.resetToday);
 // Update the daily goal
 router.put("/hydration/goal", hydrationController.updateGoal);
 
-// Get weekly stats
-router.get("/hydration/weekly", hydrationController.getWeeklyStats);
-
 export default router;

@@ -10,7 +10,7 @@ function getUserId(req) {
 
 export const hydrationController = {
 
-  
+
   //get hydration data
   getToday: async (req, res) => {
     try {
@@ -72,7 +72,7 @@ export const hydrationController = {
     }
   },
 
-  
+
   //remove water 
   removeWater: async (req, res) => {
     try {
@@ -107,7 +107,7 @@ export const hydrationController = {
     }
   },
 
- 
+
   resetToday: async (req, res) => {
     try {
       const userId = getUserId(req);
@@ -173,29 +173,5 @@ export const hydrationController = {
       res.status(500).json({ error: "Database error while updating goal" });
     }
   },
-
-  //get weekly hydration stats
-  getWeeklyStats: async (req, res) => {
-    try {
-      const userId = getUserId(req);
-      if (!userId) {
-        return res.status(401).json({ error: "User not authenticated" });
-      }
-
-      const data = await HydrationModel.getWeeklyStats(userId);
-
-      const stats = data.map(row => ({
-        date: row.date,
-        goalMl: row.goal_ml,
-        currentMl: row.current_ml,
-        percentage: Math.round((row.current_ml / row.goal_ml) * 100)
-      }));
-
-      res.json({ weekly: stats });
-    } catch (err) {
-      console.error("Error fetching weekly stats:", err);
-      res.status(500).json({ error: "Database error while fetching weekly stats" });
-    }
-  }
 
 };
