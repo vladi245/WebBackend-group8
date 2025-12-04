@@ -1,12 +1,13 @@
 import express from 'express';
 import { UserModel } from '../models/User.js';
+import authMiddleware from '../src/middleware/authMiddleware.js';
 const router = express.Router();
 
 router.get('/name', (req, res) => {
   res.json({ name: exampleUser.name });
 });
 
-router.get('/users', async (req, res) => {
+router.get('/users', authMiddleware, async (req, res) => {
   try {
     const users = await UserModel.getAll();
     res.json(users);
@@ -16,7 +17,7 @@ router.get('/users', async (req, res) => {
   }
 });
 
-router.put('/users/:id/name', async (req, res) => {
+router.put('/users/:id/name', authMiddleware, async (req, res) => {
   try {
     const userId = parseInt(req.params.id, 10);
     const { name } = req.body;
@@ -42,7 +43,7 @@ router.put('/users/:id/name', async (req, res) => {
   }
 });
 
-router.get('/users/:id/height', async (req, res) => {
+router.get('/users/:id/height', authMiddleware, async (req, res) => {
   try {
 
     const userId = req.params.id;
@@ -61,7 +62,7 @@ router.get('/users/:id/height', async (req, res) => {
 
 });
 
-router.put('/users/:id/heightsave', async (req, res) => {
+router.put('/users/:id/heightsave', authMiddleware, async (req, res) => {
   try {
 
     const userId = req.params.id;
