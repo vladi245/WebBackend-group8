@@ -11,7 +11,6 @@ import hydrationRoutes from "../routes/hydration.js";
 import authRoutes from '../routes/auth.js';
 import authMiddleware from './middleware/authMiddleware.js';
 import workoutsRoutes from '../routes/workouts.js';
-import exercisesRoutes from '../routes/exercises.js';
 import desksRouter from "../routes/desks.js";
 import contactMessages from "../routes/contactMessages.js";
 
@@ -33,12 +32,8 @@ app.use('/api/auth', authRoutes);
 // Workouts endpoints (protected)
 app.use('/api/workouts', workoutsRoutes);
 
-// Exercises list (public)
-app.use('/api/exercises', exercisesRoutes);
-
 // Protect admin routes with JWT middleware
 app.use('/admin', authMiddleware, adminRoutes);
-
 
 //test endpoint for PICO
 app.get("/test", (req, res) => {

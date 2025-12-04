@@ -7,6 +7,7 @@ const router = express.Router();
 // Protected endpoints for user's workout records and stats
 router.post('/', authMiddleware, workoutsController.addCompletedWorkout);
 router.get('/', authMiddleware, workoutsController.getUserWorkouts);
+router.get('/all', authMiddleware, workoutsController.getAllWorkouts);
 router.get('/stats', authMiddleware, workoutsController.getUserStats);
 router.delete('/:id', authMiddleware, workoutsController.deleteRecord);
 

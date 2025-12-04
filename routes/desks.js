@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getAllDesks, getDeskById, createDesk, updateDeskHeight } = require('../models/Desk');
+const { createDeskRecord, getWeeklyStandingStats, getLatestDeskRecord } = require('../models/DeskRecord');
 
 // GET /desks - list all desks (mounted under /api)
 router.get('/desks', async (req, res) => {
@@ -82,6 +83,76 @@ router.put('/desks/:id/height', async (req, res) => {
         res.json(updated);
     } catch (err) {
         console.error('Failed to update desk', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// POST /desks/records - create a new desk status record (standing/sitting change)
+router.post('/desks/records', async (req, res) => {
+    try {
+        const { deskId, userId, status } = req.body;
+
+        if (!deskId || typeof deskId !== 'string') {
+            return res.status(400).json({ error: 'deskId must be a non-empty string' });
+        }
+
+        const parsedUserId = Number(userId);
+        if (!Number.isInteger(parsedUserId) || parsedUserId <= 0) {
+            return res.status(400).json({ error: 'userId must be a positive integer' });
+        }
+
+        if (!status || !['standing', 'sitting'].includes(status)) {
+            return res.status(400).json({ error: 'status must be "standing" or "sitting"' });
+        }
+
+        const record = await createDeskRecord(deskId.trim(), parsedUserId, status);
+        res.status(201).json(record);
+    } catch (err) {
+        console.error('Failed to create desk record', err);
+
+        if (err.code === '23503') {
+            return res.status(404).json({ error: 'Desk or user not found' });
+        }
+
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// GET /desks/records/stats - get weekly standing stats for a user
+router.get('/desks/records/stats', async (req, res) => {
+    try {
+        const { userId } = req.query;
+        const parsedUserId = Number(userId);
+
+        if (!Number.isInteger(parsedUserId) || parsedUserId <= 0) {
+            return res.status(400).json({ error: 'userId must be a positive integer' });
+        }
+
+        const stats = await getWeeklyStandingStats(parsedUserId);
+        res.json(stats);
+    } catch (err) {
+        console.error('Failed to get standing stats', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// GET /desks/records/latest - get the latest desk record for a user
+router.get('/desks/records/latest', async (req, res) => {
+    try {
+        const { userId } = req.query;
+        const parsedUserId = Number(userId);
+
+        if (!Number.isInteger(parsedUserId) || parsedUserId <= 0) {
+            return res.status(400).json({ error: 'userId must be a positive integer' });
+        }
+
+        const record = await getLatestDeskRecord(parsedUserId);
+        if (!record) {
+            return res.json({ status: null, message: 'No desk records found' });
+        }
+        res.json(record);
+    } catch (err) {
+        console.error('Failed to get latest desk record', err);
         res.status(500).json({ error: 'Database error' });
     }
 });
