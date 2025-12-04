@@ -6,7 +6,7 @@ export const WorkoutRecordModel = {
             "SELECT * FROM workoutrecord_model($1, $2, $3)",
             [workout_id, user_id, timestamp]
         );
-        const insertedId = insert.rows[0].id;
+        const insertedId = insert.rows[0].record_id;
 
         // Return joined record including workout metadata so frontend can render name/calories
         const res = await pool.query(
