@@ -35,6 +35,14 @@ export const UserModel = {
     );
     return res.rows[0] || null;
   },
+
+  updateName: async (id, name) => {
+    const res = await pool.query(
+      "SELECT * FROM user_update_name($1, $2)",
+      [id, name]
+    );
+    return res.rows[0] || null;
+  },
   getUserHeight: async (id) => {
     const res = await pool.query(
       "SELECT * FROM user_getheight($1)",
