@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  express-app:
+    build: .
+    container_name: getstanding-backend
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: always
