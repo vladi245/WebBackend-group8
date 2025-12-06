@@ -3,8 +3,6 @@ import cors from "cors";
 import usersRouter from "../routes/users.js";
 import 'dotenv/config';
 
-
-
 import adminRoutes from "../routes/adminRoutes.js";
 import userMealsRoutes from "../routes/userMealsRoutes.js";
 import hydrationRoutes from "../routes/hydration.js";
