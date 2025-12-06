@@ -1,18 +1,19 @@
 import pool from "../src/db.js";
 
-export class ContactMessageModel {
-    static async create({ name, email, message }) {
+export const ContactMessageModel = {
+    create: async({name, email, message}) => {
         const res = await pool.query(
             "SELECT * FROM contactmessage_create($1, $2, $3)",
             [name, email, message]
         );
         return res.rows[0] || null;
-    }
+    },
 
-    static async getAll() {
+    getAll: async () => {
         const res = await pool.query(
-            "SELECT * FROM contactmessage_list()",
+            "SELECT * FROM contactmessage_list()"
         );
         return res.rows;
     }
-}
+};
+
