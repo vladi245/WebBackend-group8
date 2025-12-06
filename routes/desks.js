@@ -1,6 +1,6 @@
 import express from 'express';
-import { getAllDesks, getDeskById, createDesk, updateDeskHeight } from '../models/Desk.js';
-import { createDeskRecord, getWeeklyStandingStats, getLatestDeskRecord } from '../models/DeskRecord.js';
+import { DeskModel } from '../models/Desk.js';
+import { DeskRecordModel } from '../models/DeskRecord.js';
 
 const router = express.Router();
 
@@ -62,7 +62,7 @@ router.get('/desks/connection/status', async (req, res) => {
 // GET /desks - list all desks (mounted under /api)
 router.get('/desks', async (req, res) => {
     try {
-        const desks = await getAllDesks();
+        const desks = await DeskModel.getAllDesks();
         res.json(desks);
     } catch (err) {
         console.error('Failed to fetch desks', err);
@@ -76,7 +76,7 @@ router.get('/desks/:id', async (req, res) => {
         const deskId = typeof req.params.id === 'string' ? req.params.id.trim() : '';
         if (!deskId) return res.status(400).json({ error: 'Invalid id' });
 
-        const desk = await getDeskById(deskId);
+        const desk = await DeskModel.getDeskById(deskId);
         if (!desk) return res.status(404).json({ error: 'Desk not found' });
         res.json(desk);
     } catch (err) {
@@ -104,7 +104,7 @@ router.post('/desks', async (req, res) => {
             return res.status(400).json({ error: 'id must be a non-empty string' });
         }
 
-        const createdDesk = await createDesk({ id: deskId, height: parsedHeight });
+        const createdDesk = await DeskModel.createDesk({ id: deskId, height: parsedHeight });
         res.status(201).json(createdDesk);
     } catch (err) {
         console.error('Failed to create desk', err);
@@ -134,7 +134,7 @@ router.put('/desks/:id/height', async (req, res) => {
             return res.status(400).json({ error: 'height must be a non-negative integer' });
         }
 
-        const updated = await updateDeskHeight(deskId, parsedHeight);
+        const updated = await DeskModel.updateDeskHeight(deskId, parsedHeight);
         if (!updated) return res.status(404).json({ error: 'Desk not found' });
         res.json(updated);
     } catch (err) {
@@ -161,7 +161,7 @@ router.post('/desks/records', async (req, res) => {
             return res.status(400).json({ error: 'status must be "standing" or "sitting"' });
         }
 
-        const record = await createDeskRecord(deskId.trim(), parsedUserId, status);
+        const record = await DeskRecordModel.createDeskRecord(deskId.trim(), parsedUserId, status);
         res.status(201).json(record);
     } catch (err) {
         console.error('Failed to create desk record', err);
@@ -184,7 +184,7 @@ router.get('/desks/records/stats', async (req, res) => {
             return res.status(400).json({ error: 'userId must be a positive integer' });
         }
 
-        const stats = await getWeeklyStandingStats(parsedUserId);
+        const stats = await DeskRecordModel.getWeeklyStandingStats(parsedUserId);
         res.json(stats);
     } catch (err) {
         console.error('Failed to get standing stats', err);
@@ -202,7 +202,7 @@ router.get('/desks/records/latest', async (req, res) => {
             return res.status(400).json({ error: 'userId must be a positive integer' });
         }
 
-        const record = await getLatestDeskRecord(parsedUserId);
+        const record = await DeskRecordModel.getLatestDeskRecord(parsedUserId);
         if (!record) {
             return res.json({ status: null, message: 'No desk records found' });
         }

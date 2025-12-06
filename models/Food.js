@@ -3,7 +3,7 @@ import pool from "../src/db.js";
 export const FoodModel = {
   getAll: async () => {
     const res = await pool.query("SELECT * FROM list_food()");
-    return res.rows;
+    return res.rows || null;
   },
 
   create: async ({ name, calories_intake }) => {
