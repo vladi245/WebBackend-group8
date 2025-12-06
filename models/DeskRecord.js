@@ -49,7 +49,7 @@ export const DeskRecordModel = {
         startDate.setHours(0, 0, 0, 0);
         endDate.setHours(23, 59, 59, 999);
 
-        const records = await getDeskRecordsByUser(userId, startDate, endDate);
+        const records = await DeskRecordModel.getDeskRecordsByUser(userId, startDate, endDate);
 
         // Initialize days array for the week
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
