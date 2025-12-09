@@ -154,7 +154,7 @@ Authorization: Bearer <token>
 - `admin` - full admin access
 
 
-## ⚠️ Watch Out For
+## Watch Out For
 
 ### 1. Database Must Be Running
 ```bash
